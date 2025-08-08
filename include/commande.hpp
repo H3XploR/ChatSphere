@@ -9,13 +9,29 @@ enum commandeType {
     QUIT,    // Commande pour quitter le serveur
     PING,    // Commande pour répondre à un ping
     PONG,    // Commande pour envoyer un pong
-    MODE,    // Commande pour définir un mode
-    TOPIC,   // Commande pour définir un sujet de canal
     PART,    // Commande pour quitter un canal
-    KICK,    // Commande pour expulser un utilisateur d'un canal
-    INVITE,  // Commande pour inviter un utilisateur à un canal
     NOTICE   // Commande pour envoyer un avis
 };
+
+/*    The commands which may only be used by channel operators are:
+
+        KICK    - Eject a client from the channel
+        MODE    - Change the channel's mode
+        INVITE  - Invite a client to an invite-only channel (mode +i)
+        TOPIC   - Change the channel topic in a mode +t channel
+*/
+enum operatorCommandeType {
+    KICK,    // Commande pour expulser un utilisateur d'un canal
+    MODE,    // Commande pour définir un mode
+    INVITE,  // Commande pour inviter un utilisateur à un canal
+    TOPIC,   // Commande pour définir un sujet de canal
+};
+
+
+/*    A channel operator is identified by the '@' symbol next to their
+   nickname whenever it is associated with a channel (ie replies to the
+   NAMES, WHO and WHOIS commands).
+*/
 
 // Classe représentant une commande IRC
 class commande {

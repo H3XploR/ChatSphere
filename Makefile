@@ -24,7 +24,7 @@ obj/%.o: src/%.cpp
 	@echo "building $@"
 	c++ $(FLAGS) -o $@ -c $<
 
-all:$(NAME)
+all: $(NAME)
 
 clean:
 	@echo "removing obj..."
@@ -39,7 +39,7 @@ re: fclean all
 run: all
 	@./$(NAME)
 
-test_all:$(TEST)
+test_all: $(TEST)
 
 test_clean:
 	@echo "removing obj..."
@@ -49,7 +49,7 @@ test_fclean: test_clean
 	@echo "removing all..."
 	@rm $(TEST)
 
-test_re:test_fclean test_all
+test_re: test_fclean test_all
 
 test_run: test_all
 	@./$(TEST)
