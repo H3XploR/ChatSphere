@@ -11,10 +11,9 @@ class Server {
         int                 _fdSocket;
         std::vector<client> _channel;
         pollfd              _servPoll;
-        
-        void                createNewChannel(); 
-        
-        
+
+        void                createNewChannel(std::string channelName);
+
         Server();
         ~Server();
 };

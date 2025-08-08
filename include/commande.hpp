@@ -1,5 +1,6 @@
 #pragma once
-class commande {
+
+enum commandeType {
     PASS,    // Commande pour envoyer un mot de passe
     NICK,    // Commande pour définir un pseudonyme
     USER,    // Commande pour définir un utilisateur
@@ -14,4 +15,12 @@ class commande {
     KICK,    // Commande pour expulser un utilisateur d'un canal
     INVITE,  // Commande pour inviter un utilisateur à un canal
     NOTICE   // Commande pour envoyer un avis
+};
+
+// Classe représentant une commande IRC
+class commande {
+    public:
+        commande();
+        ~commande();
+
 };

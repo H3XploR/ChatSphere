@@ -6,4 +6,6 @@ class client {
     std::string _userName; //the username of the client on that host
     std::string _connectedTo; //and the server to which the client is connected
     std::string _reference; //any client can reference the channel using the name of the channel.
+    client();
+    virtual ~client();
 };

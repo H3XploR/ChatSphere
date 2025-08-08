@@ -30,6 +30,11 @@ Server::~Server() {
    channels is recommended as being ample for both experienced and
    novice users.  See section 8.13 for more information on this.
 */
-Server::createNewChannel() {
+Server::createNewChannel(std::string channelName) {
+    // Implementation for creating a new channel
+    // This function should handle the logic of creating a new channel
+    // and adding it to the server's list of channels.
+    std::cout << "Creating a new channel...\n";
+    // Logic to create a new channel goes here
 
 }

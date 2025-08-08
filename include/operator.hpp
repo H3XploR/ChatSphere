@@ -1,4 +1,5 @@
 #pragma once
+#include "client.hpp"
 /* To allow a reasonable amount of order to be kept within the IRC
    network, a special class of clients (operators) is allowed to perform
    general maintenance functions on the network.  Although the powers
@@ -17,6 +18,24 @@
    destructive and annoying.  For further details on this type of
    action, see section 4.6.1 (KILL).
    */
-class operators {
+
+/*    The channel operator (also referred to as a "chop" or "chanop") on a
+   given channel is considered to 'own' that channel. */
+
+
+   /*Dans ma logic, la class operator herite de la class client 
+     et obtient des pouvoir en plus (c'est comme un admin)*/
+class operators: public client {
+    public:
+        // Constructeur par défaut
+        operators();
+
+        // Destructeur
+        ~operators();
+
+        // Méthodes spécifiques aux opérateurs
+        void kickUser(const std::string& userName, const std::string& channelName);
+        void banUser(const std::string& userName, const std::string& channelName);
+        void setChannelMode(const std::string& channelName, const std::string& mode);
 
 };
