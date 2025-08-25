@@ -1,18 +1,17 @@
 NAME = ircserv
 TEST = area
 FLAGS = -Wall -Werror -Wextra -g3
-OBJ = obj/main.o obj/server.o
+OBJ = obj/server.o obj/channel.o obj/client.o
+OBJ_MAIN = obj/main.o 
 TEST_OBJ = test/obj/testing_area.o
 
-$(NAME): $(OBJ)
+$(NAME): $(OBJ) $(OBJ_MAIN)
 	@echo "building $@"
 	c++ $(FLAGS) -o $(NAME) $^
 
-$(TEST): $(TEST_OBJ)
+$(TEST): $(TEST_OBJ) $(OBJ)
 	@echo "building $@"
 	c++ $(FLAGS) -o $(TEST) $^
-
-
 
 test/obj/%.o: test/%.cpp
 	@mkdir -p test/obj

@@ -1,6 +1,16 @@
-#include "../include/channels.hpp"
+#include "../include/channel.hpp"
+/*CANONIC COPLIEN*/
+
+channel::channel() : _name("<clientHostname>'s_server") {
+
+}
+
+channel::~channel() {
+
+}
+
 /*
-Channels names are strings (beginning with a '&' or '#' character) of
+   Channels names are strings (beginning with a '&' or '#' character) of
    length up to 200 characters.  Apart from the the requirement that the
    first character being either '&' or '#'; the only restriction on a
    channel name is that it may not contain any spaces (' '), a control G

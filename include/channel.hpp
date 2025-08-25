@@ -11,14 +11,17 @@ enum class TYPE_SERVER {
     DISTRUBUTED
 };
 
+class client;
+
 class channel {
     /*A channel is a named group of one or more clients which will all
    receive messages addressed to that channel.*/
     public:
-    std::string         _message;
-    std::vector<client> _client;
-    std::string         _name; //Channels names are strings (beginning with a '&' or '#' character) of length up to 200 characters.
-    std::vector<operator> _operator;
+    std::string              _message;
+    std::vector<client>      _client;
+    std::string              _name; //Channels names are strings (beginning with a '&' or '#' character) of length up to 200 characters.
+    std::vector<std::string> _operator;
+    std::string
     /*
      There are two types of channels allowed by this protocol.  One is a
    distributed channel which is known to all the servers that are connected to the network.
@@ -26,6 +29,11 @@ class channel {
     */
     int                 _type;
     bool                checkName();
-    channel();
+    /*
+        Faire en sorte que le nom du channel par default soit 
+                    "<nomDuCreateur>'s server"
+    */
     ~channel();
+    private:
+        channel(); 
 };

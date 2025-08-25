@@ -3,8 +3,7 @@
 #include <exception>
 #include <unistd.h>
 
-Server::Server()
-                :_fdSocket(socket(AF_UNIX, SOCK_STREAM | SOCK_NONBLOCK, 0)) {
+Server::Server() : _fdSocket(socket(AF_UNIX, SOCK_STREAM | SOCK_NONBLOCK, 0)) {
     std::cout << "server loading....\n";
     std::cout << "fd_socket: " << _fdSocket << "\n";
     if (_fdSocket < 0)
