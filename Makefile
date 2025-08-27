@@ -1,7 +1,7 @@
 NAME = ircserv
 TEST = area
 FLAGS = -Wall -Werror -Wextra -g3
-OBJ = obj/server.o obj/channel.o obj/client.o
+OBJ = obj/server.o obj/channel.o obj/client.o obj/parser.o
 OBJ_MAIN = obj/main.o 
 TEST_OBJ = test/obj/testing_area.o
 
@@ -9,7 +9,7 @@ $(NAME): $(OBJ) $(OBJ_MAIN)
 	@echo "building $@"
 	c++ $(FLAGS) -o $(NAME) $^
 
-$(TEST): $(TEST_OBJ) $(OBJ)
+$(TEST): $(OBJ) $(TEST_OBJ)
 	@echo "building $@"
 	c++ $(FLAGS) -o $(TEST) $^
 

@@ -2,3 +2,4 @@ ircserv
 *.o
 area
 bircd
+test/obj/*

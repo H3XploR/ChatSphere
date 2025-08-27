@@ -1,13 +1,22 @@
 #include "../include/server.hpp"
-#include <iostream>
-#include <exception>
-#include <unistd.h>
 
-Server::Server() : _fdSocket(socket(AF_UNIX, SOCK_STREAM | SOCK_NONBLOCK, 0)) {
+
+Server::Server() : _fdSocket(socket(AF_UNIX, SOCK_STREAM | SOCK_NONBLOCK, 0)), _port(8080) {
     std::cout << "server loading....\n";
     std::cout << "fd_socket: " << _fdSocket << "\n";
     if (_fdSocket < 0)
         throw std::runtime_error("socket creation failed");
+      // specifying address
+    _serverAddress.sin_family = AF_INET;
+    _serverAddress.sin_port = htons(_port);
+    _serverAddress.sin_addr.s_addr = INADDR_ANY;
+    // sending connection request
+    connect(_fdSocket, (struct sockaddr*)&_serverAddress,
+            sizeof(_serverAddress));
+
+    // sending data
+    std::string message = "Hello, server!";
+    send(_fdSocket, message.c_str(), message.size(), 0);
 }
 
 Server::~Server() {

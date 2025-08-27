@@ -21,7 +21,11 @@ class channel {
     std::vector<client>      _client;
     std::string              _name; //Channels names are strings (beginning with a '&' or '#' character) of length up to 200 characters.
     std::vector<std::string> _operator;
-    std::string
+    std::string              _operatorPassword;
+    std::string              _topic; //sujet/theme du channel
+    std::string              _mode;
+    std::string				 _channelPassword;
+    int                      _user_limit;
     /*
      There are two types of channels allowed by this protocol.  One is a
    distributed channel which is known to all the servers that are connected to the network.

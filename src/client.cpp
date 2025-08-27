@@ -16,7 +16,7 @@ std::string client::getHostName() {
     }
 }
 
-std::ostream& operator<<(std::ostream& os, client Client) {
+std::ostream& operator<<(std::ostream& os, const client& Client) {
   os << "hostname: " << Client._hostName << std::endl;
   os << "username: " << Client._userName << std::endl;
   return os;

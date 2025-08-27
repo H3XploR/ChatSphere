@@ -16,6 +16,7 @@ class client {
         std::string             _reference;                //any client can reference the channel using the name of the channel.
         std::vector<channel>    _channelNameHosted;        //channel appartenants au client
         bool                    _checkCloneChannelName;    //regarder si le meme nom de serveur existe plusieurs fois
+        std::string             _input;
         std::string             getHostName();
         virtual ~client();
 
@@ -54,4 +55,4 @@ class client {
       client();
 };
 
-std::ostream& operator<<(std::ostream& os, client Client);
+std::ostream& operator<<(std::ostream& os, const client& Client);
