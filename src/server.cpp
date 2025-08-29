@@ -1,4 +1,3 @@
-
 #include "../include/server.hpp"
 
 // Convertit une adresse IP binaire en format décimal (uint32_t)
@@ -9,6 +8,24 @@ uint32_t ipToDecimal(const sockaddr_in& addr) {
 
 
 
+/**
+ * @brief Constructs a Server object, initializes and configures the server socket,
+ *        binds it to the specified port, sets up epoll for event-driven I/O, and
+ *        enters the main event loop to handle incoming connections and client I/O.
+ *
+ * The constructor performs the following steps:
+ * - Creates a non-blocking TCP socket.
+ * - Binds the socket to INADDR_ANY and the specified port.
+ * - Starts listening for incoming connections.
+ * - Initializes the epoll file descriptor and event array.
+ * - Adds the server socket to the epoll instance.
+ * - Enters an infinite loop to:
+ *   - Wait for events using epoll_wait.
+ *   - Accept new client connections and add them to epoll.
+ *   - Handle I/O events on client sockets.
+ *
+ * @throws std::runtime_error if socket creation, binding, or listening fails.
+ */
 Server::Server() : _fdSocket(socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK, 0)), _port(8080) {
     std::cout << "server loading....\n";
     std::cout << "fd_socket: " << _fdSocket << "\n";
@@ -64,7 +81,7 @@ Server::Server() : _fdSocket(socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK, 0)), _
                     epoll_ctl(_epfd, EPOLL_CTL_ADD, client_sock, &client_ev);
                     std::cout << "New client connected: " << client_sock << std::endl;
                     // Créer le nouveau client
-                    _client.emplace_back(client_sock, client("nouveau client"));
+                    _client.push_back(std::make_pair(client_sock, client("nouveau client")));
                 }
             } else {
                 // Handle IO on client sockets only
@@ -74,14 +91,34 @@ Server::Server() : _fdSocket(socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK, 0)), _
     }
 }
 
-void  Server::handle_io_on_socket(int fd) {
-  size_t size = 1084;
-  std::string buf(size, '\0');
-  ssize_t bytes_received = recv(fd, &buf[0], buf.size(), MSG_DONTWAIT);
-  if (bytes_received > 0) {
-    buf.resize(bytes_received); // Resize to actual data received
-    std::cout << buf << std::endl;
-  }
+void Server::handle_io_on_socket(int fd) {
+    size_t size = 1084;
+    std::string buf(size, '\0');
+    ssize_t bytes_received = recv(fd, &buf[0], buf.size(), MSG_DONTWAIT);
+    if (bytes_received > 0) {
+        buf.resize(bytes_received); // Resize to actual data received
+        std::cout << buf << std::endl;
+
+        // Split buffer into individual IRC commands (usually separated by \r\n)
+        size_t start = 0;
+        while (start < buf.size()) {
+            size_t end = buf.find("\r\n", start);
+            if (end == std::string::npos)
+                end = buf.size();
+            std::string command = buf.substr(start, end - start);
+            std::cout << "TEST:" << command << std::endl;
+            if (!command.empty()) {
+                for (std::list<std::pair<int, client> >::iterator it = _client.begin(); it != _client.end(); ++it) {
+                    if (it->first == fd) {
+                        parser input_parsed = parser::parseIRCCommand(command);
+                        std::cout << "input parsed: " << input_parsed;
+                        break;
+                    }
+                }
+            }
+            start = end + 2; // Move past "\r\n"
+        }
+    }
 }
 
 Server::~Server() {

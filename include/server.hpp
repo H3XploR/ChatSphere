@@ -1,5 +1,4 @@
 #pragma once
-#include <cstdint>
 #include <stdint.h>
 #include <string>
 #include <list>
@@ -8,11 +7,11 @@
 #include <poll.h>
 #include "client.hpp"
 #include "channel.hpp"
+#include "parser.hpp"
 #include <vector>
 #include <exception>
 #include <unistd.h>
 #include <netinet/in.h>
-#include <cstdint>
 #include <sys/epoll.h>
 #include <arpa/inet.h> // pour inet_ntoa
 #define EPOLL_QUEUE_LEN  10
@@ -25,7 +24,7 @@ class Server {
         int                                     _fdSocket;
         int                                     _port;
         std::vector<channel>                    _channel;
-        std::list<std::pair<int, client>>       _client;
+        std::list<std::pair<int, client> >       _client;
         pollfd                                  _servPoll;
         sockaddr_in                             _serverAddress;
         int                                     _epfd;

@@ -2,6 +2,8 @@
 #include <string>
 #include <iostream>
 #include <vector>
+#include <cstddef>
+#include <sstream>
 enum commandType {
     PASS,    // Commande pour envoyer un mot de passe
     NICK,    // Commande pour définir un pseudonyme
@@ -59,6 +61,7 @@ public:
 	std::vector<std::string> _args;    // Arguments de la commande
 	std::string _trailing;             // Partie "trailing" (texte après ':')
     static parser parseIRCCommand(const std::string& input);
+    static size_t findEndOfCommand(const std::string& input);
     parser(const std::string& input);
 	//parser(const std::string& cmd, const std::vector<std::string>& arguments, const std::string& trail);
     parser(const std::string& cmd, const std::vector<std::string>& arguments, const std::string& trail);
@@ -66,3 +69,5 @@ public:
     ~parser();
 
 };
+
+std::ostream& operator<<(std::ostream& os, parser message);

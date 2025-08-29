@@ -1,6 +1,6 @@
 NAME = ircserv
 TEST = area
-FLAGS = -Wall -Werror -Wextra -g3 -fsanitize=address -fsanitize=leak -fsanitize=undefined
+FLAGS = -Wall -Werror -Wextra -g3 -fsanitize=address -fsanitize=leak -fsanitize=undefined -std=c++98
 OBJ = obj/server.o obj/channel.o obj/client.o obj/parser.o
 OBJ_MAIN = obj/main.o 
 TEST_OBJ = test/obj/testing_area.o

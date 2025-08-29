@@ -7,10 +7,10 @@
 # : Channel global, accessible à tous les serveurs du réseau IRC.
 & : Channel local, uniquement accessible sur le serveur où il a été créé.
 */
-enum class TYPE_SERVER {
+/* enum class TYPE_SERVER {
     DISTRUBUTED
 };
-
+ */
 class client;
 
 class channel {

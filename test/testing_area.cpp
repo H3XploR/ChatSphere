@@ -1,3 +1,4 @@
+
 #include "../include/parser.hpp"
 #include <sys/socket.h>
 #include <iostream>
@@ -8,6 +9,17 @@
 #include "../include/parser.hpp"
 #include "../include/server.hpp"
 #include <istream>
+
+static void test_parser_end_of_command() {
+    std::string input = "PRIVMSG yanni :hello world\r\nAUTRETRUC";
+    parser p = parser::parseIRCCommand(input);
+    std::cout << "Test end of command: ";
+    if (p._command == "PRIVMSG" && p._args.size() == 1 && p._args[0] == "yanni" && p._trailing == "hello world")
+        std::cout << "OK" << std::endl;
+    else
+        std::cout << "FAIL" << std::endl;
+}
+
 static void test_parser_basic() {
     parser p = parser::parseIRCCommand("JOIN #general");
     std::cout << "Test JOIN: " << (p._command == "JOIN" && p._args.size() == 1 && p._args[0] == "#general" && p._trailing.empty() ? "OK" : "FAIL") << std::endl;
@@ -47,6 +59,7 @@ static void test_creating_server() {
 
 
 int main(void) {
+    test_parser_end_of_command();
     // ----------- TESTS UNITAIRES DU PARSER -----------
     test_parser_basic();
     test_parser_privmsg();

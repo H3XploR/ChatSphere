@@ -15,7 +15,7 @@ class client {
         std::vector<Server>     _connectedTo;              //and the server to which the client is connected
         std::string             _reference;                //any client can reference the channel using the name of the channel.
         std::vector<channel>    _channelNameHosted;        //channel appartenants au client
-        std::string             _input;
+/*         std::string             _input; peut-etre inutile*/
         std::string             getHostName();
         virtual ~client();
 
