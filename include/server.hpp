@@ -19,6 +19,7 @@
 #define EPOLL_RUN_TIMEOUT 1000 // 1000 ms (1 second) is a common default
 class client;
 class channel;
+class parser;
 class Server {
     public:
         int                                     _fdSocket;
@@ -32,6 +33,7 @@ class Server {
         int                                     _client_sock;
         void                createNewChannel(std::string channelName);
         void                handle_io_on_socket(int fd);
+        void                handle_command(parser parsed_command);
         Server();
         ~Server();
 };

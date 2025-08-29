@@ -91,34 +91,30 @@ Server::Server() : _fdSocket(socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK, 0)), _
     }
 }
 
-void Server::handle_io_on_socket(int fd) {
-    size_t size = 1084;
-    std::string buf(size, '\0');
-    ssize_t bytes_received = recv(fd, &buf[0], buf.size(), MSG_DONTWAIT);
-    if (bytes_received > 0) {
-        buf.resize(bytes_received); // Resize to actual data received
-        std::cout << buf << std::endl;
-
-        // Split buffer into individual IRC commands (usually separated by \r\n)
-        size_t start = 0;
-        while (start < buf.size()) {
-            size_t end = buf.find("\r\n", start);
-            if (end == std::string::npos)
-                end = buf.size();
-            std::string command = buf.substr(start, end - start);
-            std::cout << "TEST:" << command << std::endl;
-            if (!command.empty()) {
-                for (std::list<std::pair<int, client> >::iterator it = _client.begin(); it != _client.end(); ++it) {
-                    if (it->first == fd) {
-                        parser input_parsed = parser::parseIRCCommand(command);
-                        std::cout << "input parsed: " << input_parsed;
-                        break;
-                    }
-                }
-            }
-            start = end + 2; // Move past "\r\n"
-        }
+void  Server::handle_io_on_socket(int fd) {
+  size_t size = 1084;
+  std::string buf(size, '\0');
+  ssize_t bytes_received = recv(fd, &buf[0], buf.size(), MSG_DONTWAIT);
+  if (bytes_received > 0) {
+    buf.resize(bytes_received); // Resize to actual data received
+    std::cout << buf << std::endl;
+    for (std::list<std::pair<int, client> >::iterator it = _client.begin(); it != _client.end(); ++it) {
+      if (it->first == fd) {
+        // You now have an iterator 'it' pointing to the client with socket 'fd'
+        // You can access the client object via it->second
+        parser input_parsed = parser::parseIRCCommand(buf);
+        std::cout << "input parsed: " << input_parsed;
+        handle_command(input_parsed);
+        break;
+      }
     }
+
+
+  }
+}
+
+void    Server::handle_command(parser parsed_command) {
+        std::string command[10];
 }
 
 Server::~Server() {
