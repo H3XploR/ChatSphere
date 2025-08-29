@@ -1,6 +1,6 @@
 NAME = ircserv
 TEST = area
-FLAGS = -Wall -Werror -Wextra -g3
+FLAGS = -Wall -Werror -Wextra -g3 -fsanitize=address -fsanitize=leak -fsanitize=undefined
 OBJ = obj/server.o obj/channel.o obj/client.o obj/parser.o
 OBJ_MAIN = obj/main.o 
 TEST_OBJ = test/obj/testing_area.o
@@ -53,4 +53,6 @@ test_re: test_fclean test_all
 test_run: test_all
 	@./$(TEST)
 
+test_debug: test_all
+	@ lldb $(TEST)
 .PHONY: all clean fclean re run test_all test_clean test_fclean test_re test_run

@@ -1,47 +1,86 @@
+
 #include "../include/server.hpp"
 
+// Convertit une adresse IP binaire en format décimal (uint32_t)
+uint32_t ipToDecimal(const sockaddr_in& addr) {
+  std::cout << "ip to decimal: ";
+  return ntohl(addr.sin_addr.s_addr);
+}
 
-Server::Server() : _fdSocket(socket(AF_UNIX, SOCK_STREAM | SOCK_NONBLOCK, 0)), _port(8080) {
+
+
+Server::Server() : _fdSocket(socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK, 0)), _port(8080) {
     std::cout << "server loading....\n";
     std::cout << "fd_socket: " << _fdSocket << "\n";
     if (_fdSocket < 0)
         throw std::runtime_error("socket creation failed");
-      // specifying address
+    // specifying address
     _serverAddress.sin_family = AF_INET;
     _serverAddress.sin_port = htons(_port);
     _serverAddress.sin_addr.s_addr = INADDR_ANY;
-    // sending connection request
-    connect(_fdSocket, (struct sockaddr*)&_serverAddress,
-            sizeof(_serverAddress));
 
-    // sending data
-    std::string message = "Hello, server!";
-    send(_fdSocket, message.c_str(), message.size(), 0);
+    // bind the socket to the address
+    if (bind(_fdSocket, (struct sockaddr*)&_serverAddress, sizeof(_serverAddress)) < 0)
+        throw std::runtime_error("bind failed");
+    std::cout << "IP: " << ipToDecimal(this->_serverAddress) << std::endl;
+    std::cout << "Port: " << this->_port << std::endl;
+    // listen for incoming connections
+    if (listen(_fdSocket, SOMAXCONN) < 0)
+        throw std::runtime_error("listen failed");
+
     //Create specific file descriptor for epoll calls
     _epfd = epoll_create(EPOLL_QUEUE_LEN);
-  // Initialisation du tableau d'epoll_event pour chaque instance
-  for (int i = 0; i < MAX_EPOLL_EVENTS_PER_RUN; ++i) {
-    _ev[i].events = 0;
-    _ev[i].data.fd = -1;
-  }
-
-  // Ajout du client socket à epoll
-  struct epoll_event ev;
-  ev.events = EPOLLIN | EPOLLPRI | EPOLLERR | EPOLLHUP;
-  ev.data.fd = _client_sock;
-  int res = epoll_ctl(_epfd, EPOLL_CTL_ADD, _client_sock, &ev);
-
-  while (1) {
-    // Attente d'événements sur les sockets
-    int nfds = epoll_wait(_epfd, _ev, MAX_EPOLL_EVENTS_PER_RUN, EPOLL_RUN_TIMEOUT);
-    if (nfds < 0)
-      std::cout << "Error in epoll_wait!" << std::endl;
-
-    // Pour chaque socket prêt
-    for (int i = 0; i < nfds; i++) {
-      int fd = _ev[i].data.fd;
-      handle_io_on_socket(fd);
+    // Initialisation du tableau d'epoll_event pour chaque instance
+    for (int i = 0; i < MAX_EPOLL_EVENTS_PER_RUN; ++i) {
+        _ev[i].events = 0;
+        _ev[i].data.fd = -1;
     }
+
+    // Ajout du serveur socket à epoll
+    struct epoll_event ev;
+    ev.events = EPOLLIN | EPOLLPRI | EPOLLERR | EPOLLHUP;
+    ev.data.fd = _fdSocket;
+
+    int res = epoll_ctl(_epfd, EPOLL_CTL_ADD, _fdSocket, &ev);
+    (void)res;
+    while (1) {
+        // Attente d'événements sur les sockets
+        int nfds = epoll_wait(_epfd, _ev, MAX_EPOLL_EVENTS_PER_RUN, EPOLL_RUN_TIMEOUT);
+        if (nfds < 0)
+            std::cout << "Error in epoll_wait!" << std::endl;
+
+        // Pour chaque socket prêt
+        for (int i = 0; i < nfds; i++) {
+            int fd = _ev[i].data.fd;
+            if (fd == _fdSocket) {
+                // Accept new connection
+                sockaddr_in client_addr;
+                socklen_t client_len = sizeof(client_addr);
+                int client_sock = accept(_fdSocket, (struct sockaddr*)&client_addr, &client_len);
+                if (client_sock >= 0) {
+                    struct epoll_event client_ev;
+                    client_ev.events = EPOLLIN | EPOLLPRI | EPOLLERR | EPOLLHUP;
+                    client_ev.data.fd = client_sock;
+                    epoll_ctl(_epfd, EPOLL_CTL_ADD, client_sock, &client_ev);
+                    std::cout << "New client connected: " << client_sock << std::endl;
+                    // Créer le nouveau client
+                    _client.emplace_back(client_sock, client("nouveau client"));
+                }
+            } else {
+                // Handle IO on client sockets only
+                handle_io_on_socket(fd);
+            }
+        }
+    }
+}
+
+void  Server::handle_io_on_socket(int fd) {
+  size_t size = 1084;
+  std::string buf(size, '\0');
+  ssize_t bytes_received = recv(fd, &buf[0], buf.size(), MSG_DONTWAIT);
+  if (bytes_received > 0) {
+    buf.resize(bytes_received); // Resize to actual data received
+    std::cout << buf << std::endl;
   }
 }
 
@@ -72,4 +111,10 @@ void Server::createNewChannel(std::string channelName) {
     std::cout << "Creating a new channel " << channelName << "...\n";
     // Logic to create a new channel goes here
 
+}
+
+std::ostream& operator<<(std::ostream& os, const Server& server) {
+    os << "IP: " << ipToDecimal(server._serverAddress) << std::endl;
+    os << "Port: " << server._port << std::endl;
+    return os;
 }

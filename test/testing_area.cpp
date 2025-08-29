@@ -28,6 +28,7 @@ static void test_parser_trailing_spaces() {
     std::cout << "Test TOPIC: " << (p._command == "TOPIC" && p._args.size() == 1 && p._args[0] == "#chan" && p._trailing == "This is the topic with spaces" ? "OK" : "FAIL") << std::endl;
 }
 
+//j'utilise mIRC pour tester le server avec un client
 static void test_creating_server() {
     std::cout << "\n\n\n\n\n\ntest creation de server\n";
     Server irc_server;
