@@ -11,7 +11,7 @@
 #include <istream>
 
 static void test_parser_end_of_command() {
-    std::string input = "PRIVMSG yanni :hello world\r\nAUTRETRUC";
+    std::string input = "PRIVMSG lulu :hello world\r\nAUTRETRUC";
     parser p = parser::parseIRCCommand(input);
     std::cout << "Test end of command: ";
     if (p._command == "PRIVMSG" && p._args.size() == 1 && p._args[0] == "yanni" && p._trailing == "hello world")
@@ -43,7 +43,7 @@ static void test_parser_trailing_spaces() {
 //j'utilise mIRC pour tester le server avec un client
 static void test_creating_server() {
     std::cout << "\n\n\n\n\n\ntest creation de server\n";
-    Server irc_server;
+    Server irc_server(std::string("password"));
 }
 
 

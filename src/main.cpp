@@ -2,7 +2,7 @@
 
 int main(void) {
     try {
-        Server irc;
+        Server irc(std::string("password"));
     }
     catch (const std::exception &e) {
         std::cerr << "Error: " << e.what() << "\n";

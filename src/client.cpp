@@ -1,5 +1,5 @@
 #include "../include/client.hpp"
-client::client(std::string username) : _hostName(getHostName()), _userName(username) {
+client::client(std::string username) : _hostName(getHostName()), _userName(username), _authorized(false) {
     std::cout << "client created\n";
 }
 

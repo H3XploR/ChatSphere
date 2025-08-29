@@ -1,5 +1,107 @@
 #include "../include/server.hpp"
 
+// Squelettes des handlers de commandes IRC
+
+void Server::handle_pass(const parser& cmd, client& leclient, int fd) {
+    (void)fd;
+    std::cout << "handle_pass called" << std::endl;
+    if (cmd._args.at(0) == _password) {
+        std::cout << "good password!\n";
+        leclient._authorized = true; // Marque le client comme autorisé
+    } else {
+        std::cout << "bad password!\n";
+        leclient._authorized = false; // Refuse l'autorisation
+    }
+}
+
+
+void Server::handle_nick(const parser& cmd, client& leclient, int fd) {
+    (void)fd;
+    (void)leclient;
+    (void)cmd;
+    std::cout << "handle_nick called" << std::endl;
+}
+
+
+void Server::handle_user(const parser& cmd, client& leclient, int fd) {
+    (void)fd;
+    (void)leclient;
+    (void)cmd;
+    std::cout << "handle_user called" << std::endl;
+}
+
+
+void Server::handle_join(const parser& cmd, client& leclient, int fd) {
+    (void)fd;
+    (void)leclient;
+    (void)cmd;
+    std::cout << "handle_join called" << std::endl;
+}
+
+
+void Server::handle_privmsg(const parser& cmd, client& leclient, int fd) {
+    (void)fd;
+    (void)leclient;
+    (void)cmd;
+    std::cout << "handle_privmsg called" << std::endl;
+}
+
+
+void Server::handle_part(const parser& cmd, client& leclient, int fd) {
+    (void)fd;
+    (void)leclient;
+    (void)cmd;
+    std::cout << "handle_part called" << std::endl;
+}
+
+
+void Server::handle_quit(const parser& cmd, client& leclient, int fd) {
+    (void)fd;
+    (void)leclient;
+    (void)cmd;
+    std::cout << "handle_quit called" << std::endl;
+}
+
+
+void Server::handle_kick(const parser& cmd, client& leclient, int fd) {
+    (void)fd;
+    (void)leclient;
+    (void)cmd;
+    std::cout << "handle_kick called" << std::endl;
+}
+
+
+void Server::handle_invite(const parser& cmd, client& leclient, int fd) {
+    (void)fd;
+    (void)leclient;
+    (void)cmd;
+    std::cout << "handle_invite called" << std::endl;
+}
+
+
+void Server::handle_topic(const parser& cmd, client& leclient, int fd) {
+    (void)fd;
+    (void)leclient;
+    (void)cmd;
+    std::cout << "handle_topic called" << std::endl;
+}
+
+
+void Server::handle_mode(const parser& cmd, client& leclient, int fd) {
+    (void)fd;
+    (void)leclient;
+    (void)cmd;
+    std::cout << "handle_mode called" << std::endl;
+}
+
+
+void Server::handle_names(const parser& cmd, client& leclient, int fd) {
+    (void)fd;
+    (void)leclient;
+    (void)cmd;
+    std::cout << "handle_names called" << std::endl;
+}
+
 // Convertit une adresse IP binaire en format décimal (uint32_t)
 uint32_t ipToDecimal(const sockaddr_in& addr) {
   std::cout << "ip to decimal: ";
@@ -26,7 +128,7 @@ uint32_t ipToDecimal(const sockaddr_in& addr) {
  *
  * @throws std::runtime_error if socket creation, binding, or listening fails.
  */
-Server::Server() : _fdSocket(socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK, 0)), _port(8080) {
+Server::Server(std::string password) : _fdSocket(socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK, 0)), _port(8080), _password(password) {
     std::cout << "server loading....\n";
     std::cout << "fd_socket: " << _fdSocket << "\n";
     if (_fdSocket < 0)
@@ -104,7 +206,7 @@ void  Server::handle_io_on_socket(int fd) {
         // You can access the client object via it->second
         parser input_parsed = parser::parseIRCCommand(buf);
         std::cout << "input parsed: " << input_parsed;
-        handle_command(input_parsed);
+        handle_command(input_parsed, it->second, fd);
         break;
       }
     }
@@ -113,8 +215,50 @@ void  Server::handle_io_on_socket(int fd) {
   }
 }
 
-void    Server::handle_command(parser parsed_command) {
-        std::string command[10];
+void Server::handle_command(parser& parsed_command, client& leclient, int fd) {
+        std::string command[12] = {
+            "PASS",
+            "NICK",
+            "USER",
+            "JOIN",
+            "PRIVMSG",
+            "PART",
+            "QUIT",
+            "KICK",
+            "INVITE",
+            "TOPIC",
+            "MODE",
+            "NAMES"
+        };
+        typedef void (Server::*CommandHandler)(const parser&, client&, int);
+        CommandHandler handlers[12] = {
+            &Server::handle_pass,
+            &Server::handle_nick,
+            &Server::handle_user,
+            &Server::handle_join,
+            &Server::handle_privmsg,
+            &Server::handle_part,
+            &Server::handle_quit,
+            &Server::handle_kick,
+            &Server::handle_invite,
+            &Server::handle_topic,
+            &Server::handle_mode,
+            &Server::handle_names
+        };
+
+        for (int i = 0; i < 12; ++i) {
+            if (parsed_command._command == command[i]) {
+                if (i == 0)
+                    (this->*handlers[i])(parsed_command, leclient, fd);
+                else {
+                    if (leclient._authorized == true)
+                        (this->*handlers[i])(parsed_command, leclient, fd);
+                    else
+                        std::cout << "client non authorise, un mot de passe est requie pour se connecter et faire des commandes\n"; 
+                }
+                break;
+            }
+        }
 }
 
 Server::~Server() {

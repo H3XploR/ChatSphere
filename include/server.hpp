@@ -24,8 +24,9 @@ class Server {
     public:
         int                                     _fdSocket;
         int                                     _port;
+        std::string                             _password;
         std::vector<channel>                    _channel;
-        std::list<std::pair<int, client> >       _client;
+        std::list<std::pair<int, client> >      _client;
         pollfd                                  _servPoll;
         sockaddr_in                             _serverAddress;
         int                                     _epfd;
@@ -33,9 +34,22 @@ class Server {
         int                                     _client_sock;
         void                createNewChannel(std::string channelName);
         void                handle_io_on_socket(int fd);
-        void                handle_command(parser parsed_command);
-        Server();
+        void                handle_command(parser& parsed_command, client& leclient, int fd);
+        Server(std::string password);
         ~Server();
+            // Prototypes des handlers de commandes IRC
+        void handle_pass(const parser& cmd, client& leclient, int fd);
+        void handle_nick(const parser& cmd, client& leclient, int fd);
+        void handle_user(const parser& cmd, client& leclient, int fd);
+        void handle_join(const parser& cmd, client& leclient, int fd);
+        void handle_privmsg(const parser& cmd, client& leclient, int fd);
+        void handle_part(const parser& cmd, client& leclient, int fd);
+        void handle_quit(const parser& cmd, client& leclient, int fd);
+        void handle_kick(const parser& cmd, client& leclient, int fd);
+        void handle_invite(const parser& cmd, client& leclient, int fd);
+        void handle_topic(const parser& cmd, client& leclient, int fd);
+        void handle_mode(const parser& cmd, client& leclient, int fd);
+        void handle_names(const parser& cmd, client& leclient, int fd);
 };
 
 std::ostream& operator<<(std::ostream& os, const Server& server);
