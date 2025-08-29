@@ -5,6 +5,10 @@
 void Server::handle_pass(const parser& cmd, client& leclient, int fd) {
     (void)fd;
     std::cout << "handle_pass called" << std::endl;
+    if (cmd._args.empty()) {
+        std::cout << "argument manquant\n";
+        return ;
+    }
     if (cmd._args.at(0) == _password) {
         std::cout << "good password!\n";
         leclient._authorized = true; // Marque le client comme autorisé
@@ -17,9 +21,16 @@ void Server::handle_pass(const parser& cmd, client& leclient, int fd) {
 
 void Server::handle_nick(const parser& cmd, client& leclient, int fd) {
     (void)fd;
-    (void)leclient;
-    (void)cmd;
     std::cout << "handle_nick called" << std::endl;
+    if (cmd._args.empty() && cmd._trailing.empty()) {
+        std::cout << "arguments manquants\n" << std::endl;
+        return;
+    }
+    else if(!cmd._args.empty())
+        leclient._userName = cmd._args.at(0);
+    else
+        leclient._userName = cmd._trailing;
+    std::cout << "client change:\n" << leclient;
 }
 
 

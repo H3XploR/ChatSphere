@@ -9,25 +9,30 @@ size_t parser::findEndOfCommand(const std::string& input) {
 
 
 parser parser::parseIRCCommand(const std::string& input) {
-	parser result;
+	parser result(input);
 	size_t end = parser::findEndOfCommand(input);
 	std::string commandStr = (end != std::string::npos) ? input.substr(0, end) : input;
 	std::istringstream iss(commandStr);
 	std::string token;
 
-	// Extraire la commande
-	iss >> result._command;
+	// Si la commande commence par ':', ignorer le prefix
+	if (!commandStr.empty() && commandStr[0] == ':') {
+		iss >> token; // ignore le prefix
+	}
 
-	// Extraire les arguments jusqu'à ':' ou fin
-	while (iss >> token) {
-		if (token[0] == ':') {
-			// Tout ce qui suit ':' est le trailing/message
-			std::string rest;
-			std::getline(iss, rest);
-			result._trailing = token.substr(1) + rest;
-			break;
-		} else {
-			result._args.push_back(token);
+	// Extraire la commande
+	if (iss >> result._command) {
+		// Extraire les arguments jusqu'à ':' ou fin
+		while (iss >> token) {
+			if (!token.empty() && token[0] == ':') {
+				// Tout ce qui suit ':' est le trailing/message
+				std::string rest;
+				std::getline(iss, rest);
+				result._trailing = token.substr(1) + rest;
+				break;
+			} else {
+				result._args.push_back(token);
+			}
 		}
 	}
 	return result;
@@ -39,6 +44,7 @@ parser::parser() {}
 parser::parser(const std::string& input) : _input(input) {
 
 }
+
 parser::~parser() {}
 parser::parser(const std::string& cmd, const std::vector<std::string>& arguments, const std::string& trail)
 	: _command(cmd), _args(arguments), _trailing(trail) {}

@@ -20,6 +20,11 @@ static void test_parser_end_of_command() {
         std::cout << "FAIL" << std::endl;
 }
 
+static void test_parser_nick() {
+    parser p = parser::parseIRCCommand("NICK newnick");
+    std::cout << "Test NICK: " << (p._command == "NICK" && p._args.size() == 1 && p._args[0] == "newnick" && p._trailing.empty() ? "OK" : "FAIL") << std::endl;
+}
+
 static void test_parser_basic() {
     parser p = parser::parseIRCCommand("JOIN #general");
     std::cout << "Test JOIN: " << (p._command == "JOIN" && p._args.size() == 1 && p._args[0] == "#general" && p._trailing.empty() ? "OK" : "FAIL") << std::endl;
@@ -107,5 +112,6 @@ int main(void) {
     test_parser_multiple_args();
     test_parser_trailing_spaces();
     test_creating_server();
+    test_parser_nick();
     return 0;
 }
