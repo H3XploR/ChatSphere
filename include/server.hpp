@@ -35,6 +35,8 @@ class Server {
         void                createNewChannel(std::string channelName);
         void                handle_io_on_socket(int fd);
         void                handle_command(parser& parsed_command, client& leclient, int fd);
+        int                 isInChannel();
+        void                send_to_fd(std::string message, int fd);
         Server(std::string password);
         ~Server();
             // Prototypes des handlers de commandes IRC

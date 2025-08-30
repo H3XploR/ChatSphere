@@ -38,6 +38,7 @@ class channel {
                     "<nomDuCreateur>'s server"
     */
     ~channel();
+    channel(); 
     private:
-        channel(); 
+
 };

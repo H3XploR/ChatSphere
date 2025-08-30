@@ -10,27 +10,32 @@ void Server::handle_pass(const parser& cmd, client& leclient, int fd) {
         return ;
     }
     if (cmd._args.at(0) == _password) {
-        std::cout << "good password!\n";
+        send_to_fd("good password!\n", fd);
         leclient._authorized = true; // Marque le client comme autorisé
     } else {
-        std::cout << "bad password!\n";
+        send_to_fd("bad password!\n", fd);
         leclient._authorized = false; // Refuse l'autorisation
     }
 }
 
+void Server::send_to_fd(std::string message, int fd) {
+    if (send(fd, message.c_str(), message.size(), 0) < 0) {
+        std::cerr << "Failed to send message to fd " << fd << std::endl;
+    }
+}
 
 void Server::handle_nick(const parser& cmd, client& leclient, int fd) {
     (void)fd;
     std::cout << "handle_nick called" << std::endl;
     if (cmd._args.empty() && cmd._trailing.empty()) {
-        std::cout << "arguments manquants\n" << std::endl;
+        send_to_fd("arguments manquants\n", fd);
         return;
     }
     else if(!cmd._args.empty())
         leclient._userName = cmd._args.at(0);
     else
         leclient._userName = cmd._trailing;
-    std::cout << "client change:\n" << leclient;
+    send_to_fd("client changed\n", fd);
 }
 
 
@@ -43,18 +48,92 @@ void Server::handle_user(const parser& cmd, client& leclient, int fd) {
 
 
 void Server::handle_join(const parser& cmd, client& leclient, int fd) {
-    (void)fd;
-    (void)leclient;
-    (void)cmd;
-    std::cout << "handle_join called" << std::endl;
+    std::string channelName;
+    if (!cmd._args.empty())
+        channelName = cmd._args[0];
+    else if (!cmd._trailing.empty())
+        channelName = cmd._trailing;
+    else {
+        send_to_fd("Error: JOIN requires a channel name\r\n", fd);
+        return;
+    }
+
+    // Vérifier le nom du channel
+    channel tempChannel;
+    tempChannel._name = channelName;
+    if (!tempChannel.checkName()) {
+        send_to_fd("Error: Invalid channel name\r\n", fd);
+        return;
+    }
+
+    // Chercher si le channel existe déjà
+    channel* foundChannel = NULL;
+    for (size_t i = 0; i < _channel.size(); ++i) {
+        if (_channel[i]._name == channelName) {
+            foundChannel = &_channel[i];
+            break;
+        }
+    }
+    if (!foundChannel) {
+        createNewChannel(channelName);
+        foundChannel = &_channel.back();
+        send_to_fd("Channel created and joined: " + channelName + "\r\n", fd);
+    } else {
+        send_to_fd("Joined channel: " + channelName + "\r\n", fd);
+    }
+
+    // Ajouter le client au channel
+    foundChannel->_client.push_back(leclient);
+    // Ajouter le channel à la liste du client
+    leclient._channelList.push_back(std::make_pair(channelName, *foundChannel));
+
+    std::cout << "Client joined channel: " << channelName << std::endl;
+    
 }
 
 
 void Server::handle_privmsg(const parser& cmd, client& leclient, int fd) {
-    (void)fd;
-    (void)leclient;
-    (void)cmd;
-    std::cout << "handle_privmsg called" << std::endl;
+    std::string target;
+    std::string message;
+    if (!cmd._args.empty())
+        target = cmd._args[0];
+    else if (!cmd._trailing.empty())
+        target = cmd._trailing;
+    else {
+        send_to_fd("Error: PRIVMSG requires a target\r\n", fd);
+        return;
+    }
+
+    // Le message est dans _trailing
+    if (cmd._args.size() > 1)
+        message = cmd._args[1];
+    else
+        message = cmd._trailing;
+
+    if (message.empty()) {
+        send_to_fd("Error: PRIVMSG requires a message\r\n", fd);
+        return;
+    }
+
+    // Trouver le channel cible
+    channel* foundChannel = NULL;
+    for (size_t i = 0; i < _channel.size(); ++i) {
+        if (_channel[i]._name == target) {
+            foundChannel = &_channel[i];
+            break;
+        }
+    }
+    if (!foundChannel) {
+        send_to_fd("Error: Channel not found\r\n", fd);
+        return;
+    }
+
+    // Envoyer le message à tous les clients du channel
+    for (size_t i = 0; i < foundChannel->_client.size(); ++i) {
+        int client_fd = foundChannel->_client[i]._fd;
+        send_to_fd(leclient._userName + " PRIVMSG " + target + " :" + message + "\r\n", client_fd);
+    }
+    std::cout << "PRIVMSG sent to channel " << target << ": " << message << std::endl;
 }
 
 
@@ -195,6 +274,7 @@ Server::Server(std::string password) : _fdSocket(socket(AF_INET, SOCK_STREAM | S
                     std::cout << "New client connected: " << client_sock << std::endl;
                     // Créer le nouveau client
                     _client.push_back(std::make_pair(client_sock, client("nouveau client")));
+                    _client.back().second._fd = client_sock;
                 }
             } else {
                 // Handle IO on client sockets only
@@ -298,7 +378,9 @@ void Server::createNewChannel(std::string channelName) {
     // and adding it to the server's list of channels.
     std::cout << "Creating a new channel " << channelName << "...\n";
     // Logic to create a new channel goes here
-
+    channel newChannel;
+    newChannel._name = channelName;
+    _channel.push_back(newChannel);
 }
 
 std::ostream& operator<<(std::ostream& os, const Server& server) {
